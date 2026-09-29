@@ -1,5 +1,7 @@
 """Tiền xử lý dữ liệu Stroke – người phụ trách: A.
 
+HỢP ĐỒNG CẢ NHÓM: KHÔNG đổi tên hàm, tham số hay kiểu trả về khi đã đẩy lên main.
+Chỉ được thêm tham số mới có giá trị mặc định.
 """
 from pathlib import Path
 
@@ -38,9 +40,15 @@ def _to_float(X):
     return np.asarray(X, dtype=float)
 
 def get_preprocessor() -> ColumnTransformer:
-    """Bộ tiền xử lý chưa fit: median+scale cho số, one-hot cho phân loại, ép kiểu số cho nhị phân."""
+    """Bộ tiền xử lý chưa fit.
+
+    - Biến số: điền median + cờ đánh dấu khuyết thiếu (bmi khuyết thiếu tương quan
+      mạnh với stroke: 19,90% vs 4,26% — xem notebooks/01_EDA.ipynb) + chuẩn hóa.
+    - Biến phân loại: one-hot, bỏ qua danh mục lạ ở dữ liệu mới.
+    - Biến nhị phân: ép kiểu số thực, tránh lỗi khi dữ liệu mới từ form gửi dạng chuỗi.
+    """
     numeric = Pipeline([
-        ("imputer", SimpleImputer(strategy="median")),
+        ("imputer", SimpleImputer(strategy="median", add_indicator=True)),
         ("scaler", StandardScaler()),
     ])
     categorical = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
