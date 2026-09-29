@@ -1,3 +1,3 @@
 model,best_cv_average_precision
-Random Forest,0.1563
-XGBoost,0.1606
+Random Forest,0.15630700467257658
+XGBoost,0.16063964880132103

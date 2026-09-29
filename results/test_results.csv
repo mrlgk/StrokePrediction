@@ -1,2 +1,2 @@
-recall,precision,f1,roc_auc,average_precision
-0.68,0.156,0.2537,0.8355,0.2606
+model,threshold,recall,precision,f1,roc_auc,average_precision
+XGBoost,0.57,0.68,0.1559633027522936,0.2537313432835821,0.8355144032921811,0.26059996071709113
