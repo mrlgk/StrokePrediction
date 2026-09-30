@@ -31,7 +31,7 @@ EDA → Tiền xử lý → SMOTE + Stratified CV → 6 mô hình → Tuning →
 - **Mất cân bằng lớp:** SMOTE đặt **bên trong** `imblearn.Pipeline`, chỉ áp dụng trên phần train của từng fold.
 - **Mô hình:** Logistic Regression, Decision Tree, KNN, SVM, Random Forest, XGBoost.
 - **Tuning:** Random Forest và XGBoost bằng `RandomizedSearchCV`.
-- **Chỉ số đánh giá:** Recall, Precision, F1, ROC-AUC, PR-AUC. Không chọn mô hình theo accuracy vì mô hình luôn đoán "không bệnh" đã đạt khoảng 95% accuracy.
+- **Chỉ số đánh giá:** Recall, Precision, F1, ROC-AUC, PR-AUC; đồng thời so sánh Recall/Precision/F1 qua nhiều threshold bằng bảng và biểu đồ. Không chọn mô hình theo accuracy vì mô hình luôn đoán "không bệnh" đã đạt khoảng 95% accuracy.
 - **Giải thích mô hình:** feature importance và permutation importance.
 
 ## Kết quả
@@ -93,7 +93,7 @@ StrokePrediction/
 │   ├── preprocessing.py  load_data, split_data, get_preprocessor
 │   ├── models.py         Danh sách 6 mô hình
 │   ├── tuning.py         Tuning Random Forest, XGBoost
-│   └── evaluation.py     Chỉ số, confusion matrix, ROC/PR curve
+│   └── evaluation.py     Chỉ số, confusion matrix, ROC/PR và threshold curves
 ├── models/               Pipeline đã huấn luyện (stroke_pipeline.pkl)
 ├── results/              Bảng kết quả CV và biểu đồ
 ├── app.py                Ứng dụng Streamlit

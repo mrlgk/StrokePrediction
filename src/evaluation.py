@@ -90,6 +90,41 @@ def evaluate_at_thresholds(y_true, y_proba, thresholds=None) -> pd.DataFrame:
     return pd.DataFrame(rows).round(3)
 
 
+def plot_threshold_metrics(
+    threshold_results: pd.DataFrame,
+    title: str = "Recall / Precision / F1 theo threshold",
+    save_as: str | None = None,
+):
+    """Vẽ Recall, Precision và F1 theo threshold từ evaluate_at_thresholds()."""
+    required = {"threshold", "recall", "precision", "f1"}
+    missing = required.difference(threshold_results.columns)
+    if missing:
+        raise ValueError(f"Thiếu các cột bắt buộc: {', '.join(sorted(missing))}")
+    if threshold_results.empty:
+        raise ValueError("Bảng kết quả threshold không có dữ liệu để vẽ.")
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for metric, label in (
+        ("recall", "Recall"),
+        ("precision", "Precision"),
+        ("f1", "F1"),
+    ):
+        ax.plot(threshold_results["threshold"], threshold_results[metric], marker="o", label=label)
+    ax.set(
+        title=title,
+        xlabel="Threshold",
+        ylabel="Score",
+        ylim=(0, 1.05),
+    )
+    ax.grid(alpha=0.25)
+    ax.legend()
+    fig.tight_layout()
+    if save_as:
+        RESULTS_DIR.mkdir(exist_ok=True)
+        fig.savefig(RESULTS_DIR / save_as, dpi=150)
+    return fig
+
+
 def save_cv_results(rows: list[dict], filename: str = "cv_results.csv") -> Path:
     """B gọi hàm này để lưu bảng kết quả cross-validation của 6 mô hình."""
     RESULTS_DIR.mkdir(exist_ok=True)
