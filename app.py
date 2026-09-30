@@ -9,6 +9,8 @@ Giao diện theo phong cách phần mềm quản lý y tế:
 - Ba khung thông tin hiển thị đồng thời trên cùng một trang, không dùng tab
 """
 
+import json
+import math
 from pathlib import Path
 
 import joblib
@@ -21,7 +23,19 @@ import streamlit as st
 # CONFIGURATION
 # ============================================================
 MODEL_PATH = Path(__file__).resolve().parent / "models" / "stroke_pipeline.pkl"
-THRESHOLD = 0.50
+METADATA_PATH = Path(__file__).resolve().parent / "results" / "final_model_metadata.json"
+
+
+def load_decision_threshold() -> float:
+    """Đọc threshold đã chọn từ OOF; dùng 0.5 khi chưa có metadata cuối."""
+    try:
+        threshold = float(json.loads(METADATA_PATH.read_text(encoding="utf-8"))["threshold"])
+    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return 0.5
+    return threshold if math.isfinite(threshold) and 0.0 <= threshold <= 1.0 else 0.5
+
+
+THRESHOLD = load_decision_threshold()
 
 st.set_page_config(
     page_title="StrokeCare AI | Đánh giá nguy cơ đột quỵ",
@@ -915,7 +929,7 @@ with st.expander("▣  Xem dữ liệu gốc gửi vào mô hình"):
     )
     st.dataframe(
         input_df,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -933,7 +947,7 @@ button_col, spacer = st.columns([1, 2])
 with button_col:
     predict_clicked = st.button(
         "🩺  Dự đoán nguy cơ",
-        use_container_width=True,
+        width="stretch",
     )
 
 
@@ -946,8 +960,7 @@ if predict_clicked:
         try:
             proba = float(pipeline.predict_proba(input_df)[0, 1])
 
-            # 3 mức hiển thị:
-            # thấp < 25%, trung bình 25%–50%, cao >= 50%.
+            # Ba khoảng chỉ mô tả điểm tương đối; lớp nhị phân dùng threshold OOF.
             medium_boundary = THRESHOLD * 0.50
 
             if proba >= THRESHOLD:
@@ -981,10 +994,10 @@ if predict_clicked:
             st.markdown(
                 f"""
                 <div class="result-card">
-                    <div class="result-label">Điểm nguy cơ do mô hình ước tính</div>
+                    <div class="result-label">Điểm lớp đột quỵ do mô hình ước tính</div>
                     <div class="result-value">{proba:.1%}</div>
                     <span class="risk-badge {risk_class}">
-                        {icon} &nbsp;Mức nguy cơ: {risk_level}
+                        {icon} &nbsp;Mức điểm tương đối: {risk_level}
                     </span>
                 </div>
                 """,
@@ -996,13 +1009,19 @@ if predict_clicked:
                 text=f"Mức điểm mô hình: {proba:.1%}",
             )
 
+            predicted_class = "Có stroke (1)" if proba >= THRESHOLD else "Không stroke (0)"
+            st.metric("Lớp mô hình dự đoán", predicted_class)
+            st.caption(
+                f"Ngưỡng phân lớp {THRESHOLD:.0%}, chọn theo F1 từ dự đoán out-of-fold trên tập train."
+            )
+
             r1, r2, r3 = st.columns(3, gap="medium")
-            r1.metric("Nguy cơ thấp", f"< {medium_boundary:.0%}")
+            r1.metric("Điểm thấp", f"< {medium_boundary:.0%}")
             r2.metric(
-                "Nguy cơ trung bình",
+                "Điểm trung bình",
                 f"{medium_boundary:.0%} – {THRESHOLD:.0%}",
             )
-            r3.metric("Nguy cơ cao", f"≥ {THRESHOLD:.0%}")
+            r3.metric("Điểm cao", f"≥ {THRESHOLD:.0%}")
 
             st.markdown(
                 f'<div class="recommendation">💡 {recommendation}</div>',

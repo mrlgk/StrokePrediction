@@ -42,8 +42,7 @@ def _to_float(X):
 def get_preprocessor() -> ColumnTransformer:
     """Bộ tiền xử lý chưa fit.
 
-    - Biến số: điền median + cờ đánh dấu khuyết thiếu (bmi khuyết thiếu tương quan
-      mạnh với stroke: 19,90% vs 4,26% — xem notebooks/01_EDA.ipynb) + chuẩn hóa.
+    - Biến số: điền median + cờ đánh dấu khuyết thiếu + chuẩn hóa.
     - Biến phân loại: one-hot, bỏ qua danh mục lạ ở dữ liệu mới.
     - Biến nhị phân: ép kiểu số thực, tránh lỗi khi dữ liệu mới từ form gửi dạng chuỗi.
     """
@@ -54,7 +53,7 @@ def get_preprocessor() -> ColumnTransformer:
     categorical = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
     binary = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
-        ("to_float", FunctionTransformer(_to_float)),  # Thay lambda bằng _to_float
+        ("to_float", FunctionTransformer(_to_float, feature_names_out="one-to-one")),
     ])
     return ColumnTransformer(
         transformers=[

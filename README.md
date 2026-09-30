@@ -36,11 +36,18 @@ EDA → Tiền xử lý → SMOTE + Stratified CV → 6 mô hình → Tuning →
 
 ## Kết quả
 
-*(Sẽ cập nhật khi nhóm hoàn thành bước đánh giá.)*
+Các số dưới đây là trung bình 5 fold trên training set, chạy lại bằng preprocessing hiện có. PR-AUC được ghi là `average_precision`.
 
 | Mô hình | Recall | Precision | F1 | ROC-AUC | PR-AUC |
-|---|---|---|---|---|---|
-| Đang thực hiện | | | | | |
+|---|---:|---:|---:|---:|---:|
+| Logistic Regression | 0.779 | 0.140 | 0.237 | 0.848 | 0.226 |
+| Decision Tree | 0.221 | 0.143 | 0.173 | 0.576 | 0.070 |
+| KNN | 0.412 | 0.127 | 0.194 | 0.684 | 0.100 |
+| SVM | 0.483 | 0.122 | 0.194 | 0.787 | 0.147 |
+| Random Forest | 0.121 | 0.202 | 0.150 | 0.803 | 0.144 |
+| XGBoost | 0.110 | 0.187 | 0.138 | 0.801 | 0.151 |
+
+Tuning trên training set đạt Average Precision 0.177 với Random Forest và 0.214 với XGBoost. Nhóm đã chọn Logistic Regression theo AP CV. Threshold 0.74 được chọn bằng F1 trên dự đoán OOF của train. Trên holdout một lần, Recall = 0.640, Precision = 0.219, F1 = 0.327, ROC-AUC = 0.845 và AP = 0.275. Pipeline cuối nằm tại `models/stroke_pipeline.pkl`; app đọc threshold từ `results/final_model_metadata.json`. File test cũ dùng preprocessing trước khi tích hợp bản sửa được lưu riêng tại `results/legacy_test_results_before_preprocessing_fix.csv` và không dùng trong kết luận.
 
 ## Cài đặt
 

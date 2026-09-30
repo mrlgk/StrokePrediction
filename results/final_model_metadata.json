@@ -1,0 +1,9 @@
+{
+  "model": "Logistic Regression",
+  "selection_metric": "average_precision_cv",
+  "selection_value": 0.226,
+  "threshold_method": "max F1 on stratified 5-fold out-of-fold predictions; ties prefer recall",
+  "threshold": 0.74,
+  "random_state": 42,
+  "test_set_used_for_model_or_threshold_selection": false
+}
