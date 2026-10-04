@@ -39,6 +39,7 @@ def _to_float(X):
     """Hàm chuyển đổi kiểu dữ liệu ở cấp độ module để hỗ trợ pickle/joblib."""
     return np.asarray(X, dtype=float)
 
+
 def get_preprocessor() -> ColumnTransformer:
     """Bộ tiền xử lý chưa fit.
 
@@ -54,7 +55,7 @@ def get_preprocessor() -> ColumnTransformer:
     categorical = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
     binary = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
-        ("to_float", FunctionTransformer(_to_float)),  # Thay lambda bằng _to_float
+        ("to_float", FunctionTransformer(_to_float, feature_names_out="one-to-one")),  # Thay lambda bằng _to_float
     ])
     return ColumnTransformer(
         transformers=[
