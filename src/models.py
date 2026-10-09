@@ -21,9 +21,10 @@ def get_models(random_state: int = 42) -> dict:
             random_state=random_state
         ),
 
-        "KNN": KNeighborsClassifier(),
+        "KNN": KNeighborsClassifier(n_neighbors=5),
 
         "SVM": SVC(
+            probability=True,
             random_state=random_state
         ),
 
