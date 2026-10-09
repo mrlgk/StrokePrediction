@@ -6,7 +6,7 @@ Mô hình cuối do B chọn ở tuần 3.
 Chạy (ở thư mục gốc repo, .venv đang bật):
     python scripts/make_temp_pipeline.py
 
-File tạo ra: models/stroke_pipeline.pkl  → KHÔNG git add file tạm này.
+File tạo ra: models/stroke_pipeline_temp.pkl  → KHÔNG commit file tạm này.
 """
 import pickle
 import sys
@@ -23,7 +23,7 @@ from sklearn.pipeline import Pipeline
 
 from src.preprocessing import RANDOM_STATE, get_preprocessor, load_data, split_data
 
-MODEL_PATH = ROOT / "models" / "stroke_pipeline.pkl"
+MODEL_PATH = ROOT / "models" / "stroke_pipeline_temp.pkl"
 
 BASE = {
     "gender": "Male", "age": 50.0, "hypertension": 0, "heart_disease": 0,
@@ -65,7 +65,7 @@ def main() -> int:
         print("Cần A đưa hàm ra cấp module (xem nhận xét review PR).")
         return 1
     pipe = joblib.load(MODEL_PATH)  # thử luôn bước tải lại, giống app.py
-    print(f"Đã lưu và tải lại được: {MODEL_PATH}")
+    print(f"Đã lưu và tải lại được pipeline tạm: {MODEL_PATH}")
     print("Số cột sau tiền xử lý:", pipe.named_steps["preprocessor"].transform(X_test.head(2)).shape[1])
 
     rows = []
@@ -76,7 +76,7 @@ def main() -> int:
         rows.append({"Ca kiểm thử": name, "Xác suất": f"{proba:.1%}"})
     print("\nKết quả các ca biên (mô hình TẠM, chỉ để thử app chạy không lỗi):")
     print(pd.DataFrame(rows).to_string(index=False))
-    print("\nTất cả ca chạy không lỗi. Nhớ: KHÔNG git add models/stroke_pipeline.pkl tạm này.")
+    print("\nTất cả ca chạy không lỗi. File tạm riêng, không ghi đè pipeline cuối.")
     return 0
 
 
