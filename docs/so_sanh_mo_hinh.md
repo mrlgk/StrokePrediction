@@ -14,7 +14,7 @@ Các số cũ trong nhánh modeling là Logistic Regression AP 0.192 và XGBoost
 
 Ở lần chạy cũ, Logistic Regression cao hơn 0.0314 điểm AP (xấp xỉ 19,6% so với 0.1606). Nếu hai con số cũ được lấy từ cùng quy trình CV, đây là lợi thế quan sát được của Logistic Regression theo AP; tuy vậy, điểm `best_score_` của tìm kiếm siêu tham số có thể lạc quan hơn vì nó là điểm cao nhất trong quá trình chọn cấu hình. Tỷ lệ lớp dương toàn bộ dữ liệu là 4,87%, làm mốc tham khảo cho AP của bộ dữ liệu mất cân bằng.
 
-Kết quả holdout XGBoost được tạo bằng preprocessing cũ hiện lưu ở `results/legacy_test_results_before_preprocessing_fix.csv` để tham khảo lịch sử; chưa có bảng test hợp lệ cho phiên bản preprocessing hiện tại. `results/test_results.csv` đang để trống đến khi nhóm chốt mô hình và đánh giá holdout.
+Kết quả holdout lịch sử của XGBoost, được tạo bằng preprocessing cũ, được lưu riêng ở `results/legacy_test_results_before_preprocessing_fix.csv` và không dùng trong kết luận. Kết quả holdout của pipeline hiện tại nằm ở `results/test_results.csv`.
 
 ## Logistic Regression
 

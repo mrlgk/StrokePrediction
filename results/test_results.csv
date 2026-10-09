@@ -1,2 +1,2 @@
-model,threshold,recall,precision,f1,roc_auc,pr_auc,tn,fp,fn,tp
+model,threshold,recall,precision,f1,roc_auc,average_precision,tn,fp,fn,tp
 Logistic Regression,0.74,0.64,0.2191780821917808,0.32653061224489793,0.8452057613168724,0.274583718836605,858,114,18,32

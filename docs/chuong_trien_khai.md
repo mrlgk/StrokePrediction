@@ -1,6 +1,6 @@
 # Chương: Triển khai ứng dụng và đánh giá
 
-> Bản nháp kỹ thuật theo cấu trúc báo cáo mẫu. Chỉ thay các mục ghi “cập nhật sau khi chốt” khi đã có mô hình, ngưỡng và kết quả test cuối được nhóm xác nhận.
+Nội dung dưới đây mô tả phiên bản hiện hành trong repository. Trước khi nộp, nhóm cần đối chiếu tên thành viên, thông tin học phần và yêu cầu trình bày của giảng viên.
 
 ## 1. Mục tiêu triển khai
 
@@ -12,7 +12,7 @@
 
 Các giá trị nhập được gom thành một dòng `DataFrame` với tên cột trùng dữ liệu huấn luyện. Nếu người dùng chọn không biết BMI, ứng dụng gửi `NaN`; pipeline xử lý thiếu trong bước imputation. Ứng dụng tải toàn bộ pipeline từ `models/stroke_pipeline.pkl`, nhờ đó bước biến đổi dữ liệu khi dự đoán được áp dụng nhất quán với lúc huấn luyện.
 
-Pipeline dự kiến gồm `ColumnTransformer`, bước SMOTE trong giai đoạn fit và mô hình phân lớp. Preprocessing dùng median cho đặc trưng số, thêm cờ thiếu, chuẩn hóa biến số, one-hot encoding biến phân loại và bỏ qua nhãn phân loại chưa gặp. SMOTE chỉ được fit trong các fold huấn luyện; không áp dụng vào holdout.
+Pipeline gồm `ColumnTransformer`, bước SMOTE trong giai đoạn fit và Logistic Regression. Preprocessing dùng median cho đặc trưng số, thêm cờ thiếu cho BMI, chuẩn hóa biến số, one-hot encoding biến phân loại và bỏ qua nhãn phân loại chưa gặp. SMOTE chỉ được fit trong các fold huấn luyện; không áp dụng vào holdout.
 
 ## 3. Các bước dự đoán
 

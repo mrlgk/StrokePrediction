@@ -27,11 +27,12 @@ RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 def compute_metrics(y_true, y_pred, y_proba) -> dict:
     """Tính 5 chỉ số chính. KHÔNG gồm accuracy (không đáng tin với dữ liệu mất cân bằng)."""
     return {
-        "recall": recall_score(y_true, y_pred),
+        "recall": recall_score(y_true, y_pred, zero_division=0),
         "precision": precision_score(y_true, y_pred, zero_division=0),
-        "f1": f1_score(y_true, y_pred),
+        "f1": f1_score(y_true, y_pred, zero_division=0),
         "roc_auc": roc_auc_score(y_true, y_proba),
-        "pr_auc": average_precision_score(y_true, y_proba),
+        # This is Average Precision (AP), not trapezoidal area under the PR curve.
+        "average_precision": average_precision_score(y_true, y_proba),
     }
 
 

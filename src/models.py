@@ -29,7 +29,8 @@ def get_models(random_state: int = 42) -> dict:
 
         "Random Forest": RandomForestClassifier(
             random_state=random_state,
-            n_jobs=-1
+            # CV is parallelized at the outer level; avoid nested worker pools.
+            n_jobs=1
         ),
 
         "XGBoost": XGBClassifier(

@@ -10,12 +10,13 @@ def get_tuning_models(random_state: int = 42) -> dict:
     return {
         "Random Forest": RandomForestClassifier(
             random_state=random_state,
-            n_jobs=-1
+            # RandomizedSearchCV parallelizes candidates; keep each estimator single-threaded.
+            n_jobs=1
         ),
         "XGBoost": XGBClassifier(
             eval_metric="logloss",
             random_state=random_state,
-            n_jobs=-1
+            n_jobs=1
         ),
     }
 

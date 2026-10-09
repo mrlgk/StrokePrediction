@@ -35,6 +35,22 @@ MODEL_PATH = ROOT / "models" / "stroke_pipeline.pkl"
 
 def main() -> int:
     RESULTS_DIR.mkdir(exist_ok=True)
+    # Validate the training-only selection record before doing any work with holdout.
+    cv_results_path = RESULTS_DIR / "cv_results.csv"
+    if not cv_results_path.is_file():
+        raise FileNotFoundError(f"CV results are required before final evaluation: {cv_results_path}")
+    cv_results = pd.read_csv(cv_results_path)
+    required_cv_columns = {"model", "average_precision_mean"}
+    missing_cv_columns = required_cv_columns.difference(cv_results.columns)
+    if missing_cv_columns:
+        raise ValueError(f"CV results missing columns: {', '.join(sorted(missing_cv_columns))}")
+    lr_rows = cv_results.loc[
+        cv_results["model"].eq("Logistic Regression"), "average_precision_mean"
+    ]
+    if len(lr_rows) != 1 or not np.isfinite(float(lr_rows.iloc[0])):
+        raise ValueError("CV results must contain exactly one finite Logistic Regression AP score.")
+    lr_cv_ap = float(lr_rows.iloc[0])
+
     df = load_data()
     X_train, X_test, y_train, y_test = split_data(df)
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
@@ -122,8 +138,8 @@ def main() -> int:
 
     permutation = compute_permutation_importance(
         selected,
-        X_test,
-        y_test,
+        X_train,
+        y_train,
         scoring="average_precision",
         n_repeats=10,
         random_state=RANDOM_STATE,
@@ -132,16 +148,10 @@ def main() -> int:
     plot_feature_importance(
         permutation,
         value_column="importance_mean",
-        title="Logistic Regression · Permutation importance trên holdout",
+        title="Logistic Regression · Permutation importance trên training",
         save_as="permutation_importance.png",
     ).clear()
 
-    cv_results = pd.read_csv(RESULTS_DIR / "cv_results.csv")
-    lr_cv_ap = float(
-        cv_results.loc[
-            cv_results["model"].eq("Logistic Regression"), "average_precision_mean"
-        ].iloc[0]
-    )
     metadata = {
         "model": "Logistic Regression",
         "selection_metric": "average_precision_cv",
@@ -150,6 +160,7 @@ def main() -> int:
         "threshold": threshold,
         "random_state": RANDOM_STATE,
         "test_set_used_for_model_or_threshold_selection": False,
+        "test_set_used_for_feature_importance": False,
     }
     (RESULTS_DIR / "final_model_metadata.json").write_text(
         json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
