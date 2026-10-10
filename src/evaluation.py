@@ -8,6 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from sklearn.inspection import permutation_importance
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     PrecisionRecallDisplay,
@@ -26,11 +27,12 @@ RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 def compute_metrics(y_true, y_pred, y_proba) -> dict:
     """Tính 5 chỉ số chính. KHÔNG gồm accuracy (không đáng tin với dữ liệu mất cân bằng)."""
     return {
-        "recall": recall_score(y_true, y_pred),
+        "recall": recall_score(y_true, y_pred, zero_division=0),
         "precision": precision_score(y_true, y_pred, zero_division=0),
-        "f1": f1_score(y_true, y_pred),
+        "f1": f1_score(y_true, y_pred, zero_division=0),
         "roc_auc": roc_auc_score(y_true, y_proba),
-        "pr_auc": average_precision_score(y_true, y_proba),
+        # This is Average Precision (AP), not trapezoidal area under the PR curve.
+        "average_precision": average_precision_score(y_true, y_proba),
     }
 
 
@@ -88,6 +90,125 @@ def evaluate_at_thresholds(y_true, y_proba, thresholds=None) -> pd.DataFrame:
             "f1": f1_score(y_true, y_pred, zero_division=0),
         })
     return pd.DataFrame(rows).round(3)
+
+
+def plot_threshold_metrics(
+    threshold_results: pd.DataFrame,
+    title: str = "Recall / Precision / F1 theo threshold",
+    save_as: str | None = None,
+):
+    """Vẽ Recall, Precision và F1 theo threshold từ evaluate_at_thresholds()."""
+    required = {"threshold", "recall", "precision", "f1"}
+    missing = required.difference(threshold_results.columns)
+    if missing:
+        raise ValueError(f"Thiếu các cột bắt buộc: {', '.join(sorted(missing))}")
+    if threshold_results.empty:
+        raise ValueError("Bảng kết quả threshold không có dữ liệu để vẽ.")
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for metric, label in (
+        ("recall", "Recall"),
+        ("precision", "Precision"),
+        ("f1", "F1"),
+    ):
+        ax.plot(threshold_results["threshold"], threshold_results[metric], marker="o", label=label)
+    ax.set(
+        title=title,
+        xlabel="Threshold",
+        ylabel="Score",
+        ylim=(0, 1.05),
+    )
+    ax.grid(alpha=0.25)
+    ax.legend()
+    fig.tight_layout()
+    if save_as:
+        RESULTS_DIR.mkdir(exist_ok=True)
+        fig.savefig(RESULTS_DIR / save_as, dpi=150)
+    return fig
+
+
+def get_model_feature_importance(estimator, feature_names) -> pd.DataFrame:
+    """Lấy importance từ model trong sklearn/imblearn pipeline.
+
+    Cây dùng feature_importances_; mô hình tuyến tính dùng trị tuyệt đối hệ số.
+    Đây là mức đóng góp của đặc trưng theo mô hình, không phải quan hệ nhân quả.
+    """
+    model = estimator.named_steps.get("model", estimator) if hasattr(estimator, "named_steps") else estimator
+    if hasattr(model, "feature_importances_"):
+        values = np.asarray(model.feature_importances_).reshape(-1)
+    elif hasattr(model, "coef_"):
+        values = np.mean(np.abs(np.asarray(model.coef_)), axis=0)
+    else:
+        raise ValueError("Model phải có feature_importances_ hoặc coef_.")
+
+    names = list(feature_names)
+    if len(names) != len(values):
+        raise ValueError(f"Số feature name ({len(names)}) khác số importance ({len(values)}).")
+    return (
+        pd.DataFrame({"feature": names, "importance": values})
+        .sort_values("importance", ascending=False)
+        .reset_index(drop=True)
+    )
+
+
+def compute_permutation_importance(
+    estimator,
+    X,
+    y,
+    *,
+    scoring: str = "average_precision",
+    n_repeats: int = 10,
+    random_state: int = 42,
+) -> pd.DataFrame:
+    """Đo độ giảm điểm số khi xáo trộn từng cột đầu vào."""
+    result = permutation_importance(
+        estimator,
+        X,
+        y,
+        scoring=scoring,
+        n_repeats=n_repeats,
+        random_state=random_state,
+        n_jobs=-1,
+    )
+    return (
+        pd.DataFrame(
+            {
+                "feature": X.columns,
+                "importance_mean": result.importances_mean,
+                "importance_std": result.importances_std,
+            }
+        )
+        .sort_values("importance_mean", ascending=False)
+        .reset_index(drop=True)
+    )
+
+
+def plot_feature_importance(
+    importances: pd.DataFrame,
+    *,
+    value_column: str = "importance",
+    top_n: int = 15,
+    title: str = "Feature Importance",
+    save_as: str | None = None,
+):
+    """Vẽ các feature quan trọng nhất từ bảng importance."""
+    required = {"feature", value_column}
+    missing = required.difference(importances.columns)
+    if missing:
+        raise ValueError(f"Thiếu các cột bắt buộc: {', '.join(sorted(missing))}")
+    if importances.empty:
+        raise ValueError("Bảng feature importance không có dữ liệu để vẽ.")
+
+    top = importances.nlargest(top_n, value_column).sort_values(value_column)
+    fig, ax = plt.subplots(figsize=(8, max(4, 0.32 * len(top))))
+    ax.barh(top["feature"], top[value_column], color="#2f6f95")
+    ax.set(title=title, xlabel=value_column.replace("_", " "), ylabel="Feature")
+    ax.grid(axis="x", alpha=0.25)
+    fig.tight_layout()
+    if save_as:
+        RESULTS_DIR.mkdir(exist_ok=True)
+        fig.savefig(RESULTS_DIR / save_as, dpi=150, bbox_inches="tight")
+    return fig
 
 
 def save_cv_results(rows: list[dict], filename: str = "cv_results.csv") -> Path:

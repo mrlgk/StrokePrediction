@@ -1,0 +1,12 @@
+case,score
+Mặc định của app,0.22802190421481805
+Tuổi rất nhỏ (trẻ em),0.008202869972721419
+Tuổi rất lớn,0.9666278006275858
+Không biết BMI (NaN),0.5917972812286633
+BMI thấp nhất của form,0.20315750698556784
+BMI cao nhất của form,0.38137654393378784
+Glucose cực cao,0.48834041131543726
+Glucose bằng 0,0.16652331903199794
+Giới tính Other,0.28781288877551864
+Nguy cơ cao tổng hợp,0.9675466063520978
+Nguy cơ thấp tổng hợp,0.016650886733034796

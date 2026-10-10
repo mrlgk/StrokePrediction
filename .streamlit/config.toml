@@ -1,0 +1,11 @@
+[theme]
+# Khóa cứng theme về sáng, KHÔNG theo dark mode của hệ điều hành/trình duyệt.
+# Đây là nguyên nhân khiến các khung chọn/nhập liệu bị đen: mặc định Streamlit
+# dùng base = "auto" và tự đổi theo prefers-color-scheme của máy người xem.
+base = "light"
+
+primaryColor = "#2f6f95"            # Hospital Blue – dùng cho nút bấm, điểm nhấn
+backgroundColor = "#eef2f5"         # Nền trang – khớp --page-bg trong app.py
+secondaryBackgroundColor = "#ffffff" # Nền sidebar/khung phụ – khớp --card-bg
+textColor = "#263f50"               # Màu chữ chính – khớp --text
+font = "sans serif"

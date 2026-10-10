@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Model binaries: keep only the selected final pipeline in version control.
+models/*.pkl
+!models/stroke_pipeline.pkl
