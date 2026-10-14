@@ -32,6 +32,27 @@ Cross-validation dùng `StratifiedKFold` năm fold. Pipeline đặt preprocessin
 
 Trong lần chạy lại trên preprocessing hiện tại, Logistic Regression đạt AP CV 0,226; XGBoost đã tuning đạt AP CV 0,214. Nhóm chọn Logistic Regression theo AP CV. Holdout đạt Recall 0,640, Precision 0,219, F1 0,327, ROC-AUC 0,845 và AP 0,275 tại threshold 0,74. Confusion matrix có TN=858, FP=114, FN=18, TP=32. Các biểu đồ và bảng chi tiết nằm trong `results/`.
 
+### Đọc kết quả importance
+
+Hai bảng importance của mô hình cuối (`results/feature_importance.csv` và `results/permutation_importance.csv`) đo hai đại lượng khác nhau nên xếp hạng không trùng nhau. Khi trình bày cần đọc chúng cùng nhau, không chọn một bảng rồi kết luận.
+
+- **Hệ số tuyệt đối:** tính trên 22 đặc trưng sau tiền xử lý. Một biến phân loại được tách thành nhiều cột one-hot, mỗi cột có hệ số riêng; trị tuyệt đối làm mất hướng ảnh hưởng. `age` đứng đầu (2,07) và `bmi` thấp (0,076).
+- **Permutation importance:** tính trên 10 cột gốc, trên tập train, theo mức giảm Average Precision. `age` đứng đầu (0,153), `bmi` đứng thứ hai (0,0405).
+
+**Vì sao `bmi` tăng hạng ở permutation.** Pipeline tạo thêm cột cờ thiếu BMI (`missingindicator_bmi`, hệ số 0,31, xếp thứ 8 trong bảng hệ số). Khi xáo trộn cột `bmi` gốc, cả giá trị BMI lẫn vị trí các ô thiếu bị xáo trộn, nên mức giảm điểm phản ánh chủ yếu thông tin thiếu BMI chứ không phải độ lớn BMI. Phép thử phụ trên tập train (Logistic Regression `class_weight="balanced"`, không có SMOTE, chỉ để chẩn đoán, không phải pipeline cuối) cho kết quả cùng chiều:
+
+| Cách xáo trộn `bmi` | Mức giảm AP |
+|---|---|
+| Xáo cả cột (như script) | 0,043 |
+| Chỉ xáo giá trị, giữ nguyên các ô thiếu | khoảng 0 (-0,0007) |
+| Chỉ xáo vị trí ô thiếu | 0,046 |
+
+Trên tập train, tỷ lệ stroke ở nhóm thiếu BMI là 21,8%, so với 4,1% ở nhóm có BMI. Cần nhớ rằng thiếu BMI trong dữ liệu có thể phản ánh cách thu thập dữ liệu, không phải một yếu tố sinh học; vì vậy không nên viết "BMI là yếu tố quan trọng thứ hai" mà nên viết rằng *tình trạng thiếu BMI* mang thông tin dự báo trong bộ dữ liệu này.
+
+**Vì sao `hypertension` có hệ số lớn nhưng permutation gần 0 (âm).** Giá trị trung bình -0,0013 nằm trong độ lệch chuẩn 0,0030, tức không khác 0 một cách đáng tin cậy. `hypertension` tương quan với `age` (r khoảng 0,27 trên train), mà `age` đã mang phần lớn tín hiệu, nên xáo trộn riêng `hypertension` hầu như không làm AP giảm. Hệ số lớn và permutation nhỏ không mâu thuẫn: hệ số đo trọng số trong mô hình trên thang chuẩn hóa, còn permutation đo mức đóng góp vào điểm số.
+
+Các kết luận này mang tính khám phá trên tập huấn luyện; không dùng chúng để chọn lại đặc trưng hay mô hình, và không diễn giải như quan hệ nhân quả.
+
 ## 5. Hạn chế và hướng sử dụng
 
 - Bộ dữ liệu là dữ liệu học tập, không đại diện cho mọi quần thể hoặc cơ sở y tế.
