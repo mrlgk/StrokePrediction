@@ -43,6 +43,7 @@ Trình bày kiến trúc trong `docs/chuong_trien_khai.md`: cấu trúc đầu v
 - Mô hình cuối và threshold đã chốt trước khi mở holdout.
 - Bảng metric test, confusion matrix, ROC và Precision-Recall.
 - Feature importance/permutation importance của mô hình cuối.
+  - Giải thích vì sao hai bảng xếp hạng khác nhau (đặc biệt `bmi` và `hypertension`), xem mục "Đọc kết quả importance" trong `docs/chuong_trien_khai.md`.
 - Kết quả kiểm thử ca biên. Phân biệt kiểm tra kỹ thuật pipeline tạm với kết quả mô hình cuối.
 
 ## Kết luận và hướng phát triển

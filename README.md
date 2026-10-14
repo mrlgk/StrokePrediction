@@ -27,18 +27,18 @@ EDA → Tiền xử lý → SMOTE + Stratified CV → 6 mô hình → Tuning →
 ```
 
 - **Chia dữ liệu:** train/test có `stratify`, `random_state=42`. Tập test chỉ dùng một lần ở cuối.
-- **Tiền xử lý:** điền `bmi` thiếu bằng median, chuẩn hóa biến số (`StandardScaler`), one-hot các biến phân loại. Tất cả nằm trong `Pipeline` để không rò rỉ dữ liệu.
+- **Tiền xử lý:** điền `bmi` thiếu bằng median và thêm cột cờ đánh dấu thiếu BMI (`add_indicator=True`), chuẩn hóa biến số (`StandardScaler`), one-hot các biến phân loại. Tất cả nằm trong `Pipeline` để không rò rỉ dữ liệu.
 - **Mất cân bằng lớp:** SMOTE đặt **bên trong** `imblearn.Pipeline`, chỉ áp dụng trên phần train của từng fold.
 - **Mô hình:** Logistic Regression, Decision Tree, KNN, SVM, Random Forest, XGBoost.
 - **Tuning:** Random Forest và XGBoost bằng `RandomizedSearchCV`.
-- **Chỉ số đánh giá:** Recall, Precision, F1, ROC-AUC, PR-AUC; đồng thời so sánh Recall/Precision/F1 qua nhiều threshold bằng bảng và biểu đồ. Không chọn mô hình theo accuracy vì mô hình luôn đoán "không bệnh" đã đạt khoảng 95% accuracy.
-- **Giải thích mô hình:** feature importance và permutation importance.
+- **Chỉ số đánh giá:** Recall, Precision, F1, ROC-AUC, Average Precision (AP, xấp xỉ diện tích dưới đường Precision-Recall; là tiêu chí chính để chọn mô hình); đồng thời so sánh Recall/Precision/F1 qua nhiều threshold bằng bảng và biểu đồ. Không chọn mô hình theo accuracy vì mô hình luôn đoán "không bệnh" đã đạt khoảng 95% accuracy.
+- **Giải thích mô hình:** trị tuyệt đối hệ số của Logistic Regression và permutation importance (tính trên training set, chỉ mang tính khám phá). Hai bảng xếp hạng khác nhau; xem `docs/chuong_trien_khai.md`.
 
 ## Kết quả
 
-Các số dưới đây là trung bình 5 fold trên training set, chạy lại bằng preprocessing hiện có. PR-AUC được ghi là `average_precision`.
+Các số dưới đây là trung bình 5 fold trên training set, chạy lại bằng preprocessing hiện có. Cột AP là `average_precision` trong `results/cv_results.csv`.
 
-| Mô hình | Recall | Precision | F1 | ROC-AUC | PR-AUC |
+| Mô hình | Recall | Precision | F1 | ROC-AUC | AP |
 |---|---:|---:|---:|---:|---:|
 | Logistic Regression | 0.779 | 0.140 | 0.237 | 0.848 | 0.226 |
 | Decision Tree | 0.221 | 0.143 | 0.173 | 0.576 | 0.070 |

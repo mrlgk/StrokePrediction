@@ -8,6 +8,8 @@ Logistic Regression ước lượng xác suất một mẫu thuộc lớp dươn
 
 Trong bài toán này, Logistic Regression là mốc so sánh gọn và dễ giải thích. Dữ liệu mất cân bằng được xử lý trong pipeline bằng SMOTE trên từng fold huấn luyện. Mô hình được đánh giá bằng Recall, Precision, F1, ROC-AUC và Average Precision; threshold mặc định 0,5 không được xem là lựa chọn bắt buộc.
 
+Logistic Regression là mô hình cuối của đồ án nên phần giải thích mô hình dựa trên hai nguồn. Thứ nhất là trị tuyệt đối hệ số trên 22 đặc trưng sau tiền xử lý (biến số đã chuẩn hóa, biến phân loại đã one-hot, cùng cờ thiếu BMI); trị tuyệt đối cho biết độ lớn nhưng không cho biết hướng, nên cần đọc kèm dấu của hệ số. Thứ hai là permutation importance: xáo trộn từng trong 10 cột đầu vào gốc của pipeline đã huấn luyện và đo mức giảm Average Precision (lặp 10 lần), tính trên tập train. Hai cách đo khác nhau về đơn vị và cách tính nên thứ hạng không nhất thiết trùng nhau; kết quả chỉ mang tính khám phá trên tập huấn luyện, không phải bằng chứng về khả năng tổng quát hóa hay quan hệ nhân quả.
+
 ## 2. Decision Tree
 
 Decision Tree chia dữ liệu thành các nhóm bằng những quy tắc dạng “đặc trưng này nhỏ hơn ngưỡng”. Ở mỗi nút, thuật toán tìm phép chia làm các nhánh con thuần hơn theo tiêu chí như Gini impurity hoặc entropy. Quá trình tiếp tục cho đến khi đạt giới hạn độ sâu, số mẫu tối thiểu hoặc điều kiện dừng khác. Dự đoán ở lá thường là lớp phổ biến hoặc tỷ lệ lớp của các mẫu trong lá.
@@ -38,7 +40,7 @@ Random Forest kết hợp nhiều Decision Tree. Mỗi cây được huấn luy�
 
 Random Forest thường nắm bắt quan hệ phi tuyến, tương tác và ít cần chuẩn hóa. Mô hình vẫn có thể thiên về lớp đa số nếu dữ liệu mất cân bằng; tăng số cây không tự giải quyết vấn đề này. Độ sâu, số mẫu mỗi lá, số đặc trưng xét tại mỗi nút và cơ chế cân bằng dữ liệu ảnh hưởng đến kết quả.
 
-Trong đồ án, Random Forest được tuning bằng RandomizedSearchCV với Average Precision làm tiêu chí. Mỗi fold dùng pipeline gồm preprocessing, SMOTE và mô hình, để dữ liệu tổng hợp chỉ xuất hiện trong phần huấn luyện của fold. Feature importance dựa trên mức giảm impurity có thể làm nổi bật đặc trưng liên tục hoặc có nhiều mức; permutation importance được bổ sung để kiểm tra mức giảm điểm số khi xáo trộn một đặc trưng.
+Trong đồ án, Random Forest được tuning bằng RandomizedSearchCV với Average Precision làm tiêu chí. Mỗi fold dùng pipeline gồm preprocessing, SMOTE và mô hình, để dữ liệu tổng hợp chỉ xuất hiện trong phần huấn luyện của fold. Về mặt lý thuyết, feature importance dựa trên mức giảm impurity của Random Forest có thể làm nổi bật đặc trưng liên tục hoặc có nhiều mức. Random Forest chỉ được tuning để đối chứng nên đồ án không báo cáo importance của mô hình này; phần giải thích dùng mô hình cuối (xem mục 1).
 
 ## 6. XGBoost
 
@@ -46,4 +48,4 @@ XGBoost là phương pháp boosting dựa trên cây. Các cây được thêm l
 
 Boosting có thể nắm bắt quan hệ phi tuyến và tương tác mà không cần chuẩn hóa như các phương pháp dựa trên khoảng cách. Hiệu năng phụ thuộc vào cấu hình siêu tham số và quy trình xác thực; nếu dùng quá nhiều cây hoặc cây quá sâu, mô hình có thể khớp nhiễu. XGBoost cũng không tự bảo đảm xác suất được hiệu chuẩn theo tỷ lệ stroke thực tế, đặc biệt khi kết hợp SMOTE.
 
-Đồ án dùng RandomizedSearchCV để tìm cấu hình theo Average Precision. SMOTE nằm trong pipeline để không rò rỉ thông tin qua các fold. Mô hình cuối được chọn theo kết quả xác thực trên train; threshold được xác định từ dự đoán out-of-fold và giữ cố định khi đánh giá holdout. Feature importance của XGBoost được xem cùng permutation importance, không diễn giải điểm importance như quan hệ nhân quả.
+Đồ án dùng RandomizedSearchCV để tìm cấu hình theo Average Precision. SMOTE nằm trong pipeline để không rò rỉ thông tin qua các fold. Mô hình cuối được chọn theo kết quả xác thực trên train; threshold được xác định từ dự đoán out-of-fold và giữ cố định khi đánh giá holdout. XGBoost là mô hình boosting chính được tuning (AP CV sau tuning 0,2139, thấp hơn Logistic Regression 0,226 nên không được chọn làm mô hình cuối). Vì vậy các bảng và biểu đồ importance của đồ án được tính cho Logistic Regression, không phải XGBoost. Dù với mô hình nào, điểm importance không được diễn giải như quan hệ nhân quả.
