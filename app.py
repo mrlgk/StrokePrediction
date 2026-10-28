@@ -755,28 +755,31 @@ c1, c2 = st.columns(2, gap="large")
 
 with c1:
     avg_glucose_level = st.number_input(
-        "Glucose trung bình (mg/dL)",
-        min_value=0.0,
-        max_value=400.0,
+        "Glucose trung bình theo dữ liệu (mg/dL)",
+        min_value=55.12,
+        max_value=271.74,
         value=100.0,
         step=1.0,
         help=(
-            "Glucose máu lúc đói thường được xem là bình thường khi dưới "
-            "100 mg/dL. Khoảng tham chiếu có thể thay đổi theo xét nghiệm "
-            "và bối cảnh lâm sàng."
+            "Giới hạn nhập theo min–max quan sát trong bộ dữ liệu của đồ án "
+            "(55,12–271,74 mg/dL), không phải ngưỡng chẩn đoán hay khoảng "
+            "tham chiếu chung. Kết quả glucose phụ thuộc loại xét nghiệm "
+            "và thời điểm lấy mẫu."
         ),
     )
 
 with c2:
     bmi = st.number_input(
         "BMI (kg/m²)",
-        min_value=10.0,
-        max_value=100.0,
+        min_value=10.3,
+        max_value=97.6,
         value=25.0,
         step=0.1,
         help=(
-            "BMI 18.5–24.9 thường được phân loại là khoảng bình thường "
-            "ở người trưởng thành. BMI chỉ là một chỉ số tham khảo."
+            "Giới hạn nhập theo min–max quan sát trong bộ dữ liệu của đồ án "
+            "(10,3–97,6 kg/m²), không phải khoảng BMI khỏe mạnh. Ở người "
+            "trưởng thành, BMI chỉ là một chỉ số sàng lọc và cần được diễn "
+            "giải cùng các thông tin sức khỏe khác."
         ),
     )
 
@@ -806,18 +809,18 @@ c1, c2 = st.columns(2, gap="large")
 
 with c1:
     hypertension = st.selectbox(
-        "Tăng huyết áp",
+        "Tiền sử tăng huyết áp",
         [0, 1],
         format_func=lambda v: "Có" if v else "Không",
-        help="Cho biết bệnh nhân có tiền sử/tình trạng tăng huyết áp theo dữ liệu đầu vào hay không.",
+        help="Cờ 0/1 theo trường hypertension của dataset; đây không phải kết quả đo huyết áp hiện tại hay chẩn đoán mới.",
     )
 
 with c2:
     heart_disease = st.selectbox(
-        "Bệnh tim",
+        "Tiền sử bệnh tim",
         [0, 1],
         format_func=lambda v: "Có" if v else "Không",
-        help="Cho biết bệnh nhân có tiền sử bệnh tim theo dữ liệu đầu vào hay không.",
+        help="Cờ 0/1 theo trường heart_disease của dataset; không thay thế hồ sơ hoặc đánh giá y tế.",
     )
 
 st.markdown("</div>", unsafe_allow_html=True)
@@ -843,12 +846,15 @@ c1, c2, c3 = st.columns(3, gap="large")
 
 with c1:
     age = st.number_input(
-        "Tuổi",
-        min_value=0.0,
-        max_value=120.0,
+        "Tuổi (năm)",
+        min_value=0.08,
+        max_value=82.0,
         value=50.0,
-        step=1.0,
-        help="Tuổi của bệnh nhân, tính theo năm.",
+        step=0.1,
+        help=(
+            "Giới hạn nhập theo min–max quan sát trong dataset đồ án "
+            "(0,08–82 năm); không thể hiện giới hạn tuổi y khoa chung."
+        ),
     )
 
 with c2:
@@ -892,6 +898,13 @@ with c3:
     )
 
 st.markdown("</div>", unsafe_allow_html=True)
+
+if age < 20:
+    st.info(
+        "Với người dưới 20 tuổi, BMI cần được diễn giải theo tuổi và giới "
+        "bằng biểu đồ tăng trưởng. Model này chỉ là đồ án học tập, chưa được "
+        "thẩm định lâm sàng theo nhóm tuổi; không dùng điểm đầu ra để đánh giá sức khỏe."
+    )
 
 
 # ============================================================
